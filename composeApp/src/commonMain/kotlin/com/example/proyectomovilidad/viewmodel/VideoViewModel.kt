@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.Clock as KtClock
 
 class VideoViewModel : ViewModel() {
     private val storageService = VideoStorageService()
@@ -26,8 +26,9 @@ class VideoViewModel : ViewModel() {
             _isUploadingGlobal.value = true
             
             // 1. Crear un registro temporal para mostrar en la UI
-            val tempId = Clock.System.now().toEpochMilliseconds().toString()
-            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val now = KtClock.System.now()
+            val tempId = now.toEpochMilliseconds().toString()
+            val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
             
             val tempVideo = VideoUpload(
                 id = tempId,
