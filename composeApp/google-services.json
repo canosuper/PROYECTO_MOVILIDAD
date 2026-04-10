@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "34987173441",
+    "project_id": "proyecto-movilidad-18726",
+    "storage_bucket": "proyecto-movilidad-18726.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:34987173441:android:42ce30af258b48f6f308c0",
+        "android_client_info": {
+          "package_name": "com.example.proyectomovilidad"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCk-I6mu0GVTDPo-ZOM-dbgWpnwit90hfY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

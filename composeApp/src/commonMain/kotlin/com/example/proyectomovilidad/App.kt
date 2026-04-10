@@ -9,7 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.proyectomovilidad.model.VideoUpload
+import com.example.proyectomovilidad.ui.AlpScreen
 import com.example.proyectomovilidad.ui.DashboardScreen
+import com.example.proyectomovilidad.ui.GasScreen
 import com.example.proyectomovilidad.ui.VideoListScreen
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -42,26 +44,16 @@ fun App() {
                     PlaceholderScreen("Documento de Compromiso") { currentScreen = "dashboard" }
                 }
                 "alp" -> {
-                    PlaceholderScreen("Escala ALP") { currentScreen = "dashboard" }
+                    AlpScreen(onBack = { currentScreen = "dashboard" })
                 }
                 "gas" -> {
-                    PlaceholderScreen("Escala GAS") { currentScreen = "dashboard" }
+                    GasScreen(onBack = { currentScreen = "dashboard" })
                 }
                 "video" -> {
+                    val videoViewModel = remember { com.example.proyectomovilidad.viewmodel.VideoViewModel() }
                     VideoListScreen(
-                        videos = videos,
-                        onBack = { currentScreen = "dashboard" },
-                        onAddVideo = { uri, durationSeconds ->
-                            val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-                            val newVideo = VideoUpload(
-                                id = videos.size.toString(),
-                                date = now,
-                                goalId = "goal_1",
-                                videoUrl = uri,
-                                durationSeconds = durationSeconds
-                            )
-                            videos = videos + newVideo
-                        }
+                        viewModel = videoViewModel,
+                        onBack = { currentScreen = "dashboard" }
                     )
                 }
             }

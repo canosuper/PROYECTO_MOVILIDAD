@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,14 +19,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.proyectomovilidad.model.VideoUpload
 import com.example.proyectomovilidad.util.rememberVideoPicker
+import com.example.proyectomovilidad.viewmodel.VideoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoListScreen(
-    videos: List<VideoUpload>,
-    onBack: () -> Unit,
-    onAddVideo: (uri: String, durationSeconds: Int) -> Unit
+    viewModel: VideoViewModel,
+    onBack: () -> Unit
 ) {
+    val videos by viewModel.videos.collectAsState()
+    val isUploadingGlobal by viewModel.isUploadingGlobal.collectAsState()
+    
     var showErrorDialog by remember { mutableStateOf<String?>(null) }
     var showSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -33,11 +37,8 @@ fun VideoListScreen(
     val videoPicker = rememberVideoPicker(
         onVideoSelected = { uri, durationMs ->
             val seconds = (durationMs / 1000).toInt()
-            if (seconds > 120) {
-                showErrorDialog = "El vídeo es demasiado largo (${seconds} seg). El máximo permitido son 2 minutos (120 seg)."
-            } else {
-                onAddVideo(uri, seconds)
-            }
+            // El VideoViewModel ya se encarga de la subida
+            viewModel.uploadVideo(uri, seconds)
             showSheet = false
         },
         onError = { error ->
@@ -58,8 +59,10 @@ fun VideoListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showSheet = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir Vídeo")
+            if (!isUploadingGlobal) {
+                FloatingActionButton(onClick = { showSheet = true }) {
+                    Icon(Icons.Default.Add, contentDescription = "Añadir Vídeo")
+                }
             }
         }
     ) { padding ->
@@ -100,7 +103,7 @@ fun VideoListScreen(
             }
         }
 
-        if (videos.isEmpty()) {
+        if (videos.isEmpty() && !isUploadingGlobal) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -121,6 +124,26 @@ fun VideoListScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                if (isUploadingGlobal) {
+                    item {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text("Subiendo vídeo... por favor, no cierres la app.")
+                            }
+                        }
+                    }
+                }
+
                 item {
                     Text(
                         text = "Historial de grabaciones",
@@ -128,7 +151,8 @@ fun VideoListScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
-                items(videos) { video ->
+                
+                items(videos.reversed()) { video ->
                     VideoItem(video)
                 }
             }
@@ -148,20 +172,20 @@ fun VideoItem(video: VideoUpload) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.PlayCircle,
+                imageVector = if (video.isUploading) Icons.Default.CloudUpload else Icons.Default.PlayCircle,
                 contentDescription = null,
                 modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = if (video.isUploading) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Vídeo del ${video.date}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Duración: ${video.durationSeconds} segundos",
+                    text = if (video.isUploading) "Subiendo..." else "Duración: ${video.durationSeconds} segundos",
                     style = MaterialTheme.typography.bodySmall
                 )
             }

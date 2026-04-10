@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.googleServices)
 }
 
 kotlin {
@@ -32,6 +33,8 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(libs.kotlinx.datetime)
+            implementation(libs.firebase.storage)
+            implementation(libs.firebase.common)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
