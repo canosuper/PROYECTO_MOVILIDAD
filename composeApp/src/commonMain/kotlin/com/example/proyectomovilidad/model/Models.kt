@@ -33,7 +33,7 @@ data class GasGoal(
 )
 
 /**
- * Registro de video subido por la familia.
+ * Registro de video subido  por la familia.
  */
 data class VideoUpload(
     val id: String,
