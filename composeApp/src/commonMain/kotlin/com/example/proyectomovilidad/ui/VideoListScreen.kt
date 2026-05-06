@@ -30,6 +30,7 @@ fun VideoListScreen(
     val videos by viewModel.videos.collectAsState()
     val isUploadingGlobal by viewModel.isUploadingGlobal.collectAsState()
     
+    var selectedVideoUrl by remember { mutableStateOf<String?>(null) }
     var showErrorDialog by remember { mutableStateOf<String?>(null) }
     var showSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -74,6 +75,26 @@ fun VideoListScreen(
                 confirmButton = {
                     TextButton(onClick = { showErrorDialog = null }) {
                         Text("Entendido")
+                    }
+                }
+            )
+        }
+
+        if (selectedVideoUrl != null) {
+            AlertDialog(
+                onDismissRequest = { selectedVideoUrl = null },
+                title = { Text("Reproductor") },
+                text = {
+                    VideoPlayer(
+                        url = selectedVideoUrl!!,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { selectedVideoUrl = null }) {
+                        Text("Cerrar")
                     }
                 }
             )
@@ -152,8 +173,12 @@ fun VideoListScreen(
                     )
                 }
                 
-                items(videos.reversed()) { video ->
-                    VideoItem(video)
+                items(videos.reversed().take(10)) { video ->
+                    VideoItem(video, onClick = {
+                        if (!video.isUploading && video.videoUrl.isNotEmpty()) {
+                            selectedVideoUrl = video.videoUrl
+                        }
+                    })
                 }
             }
         }
@@ -161,9 +186,11 @@ fun VideoListScreen(
 }
 
 @Composable
-fun VideoItem(video: VideoUpload) {
+fun VideoItem(video: VideoUpload, onClick: () -> Unit) {
     OutlinedCard(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = !video.isUploading) { onClick() }
     ) {
         Row(
             modifier = Modifier
