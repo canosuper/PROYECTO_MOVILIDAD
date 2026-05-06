@@ -9,20 +9,29 @@ import kotlinx.datetime.Clock
 expect fun createFirebaseFile(uri: String): File
 
 class VideoStorageService {
-    private val storage = Firebase.storage
+    // Especificamos el bucket explícitamente como hicimos con la DB para evitar desvíos de región
+    private val storage = Firebase.storage("gs://proyecto-movilidad-18726.firebasestorage.app")
 
     suspend fun uploadVideo(localUri: String, userId: String): String {
-        val timestamp = Clock.System.now().toEpochMilliseconds()
-        val fileName = "video_${timestamp}.mp4"
-        val storageRef = storage.reference("videos/$userId/$fileName")
-        
-        // Usamos la implementación nativa de cada plataforma
-        val fileToUpload = createFirebaseFile(localUri)
-        
-        // Realizamos la subida
-        storageRef.putFile(fileToUpload)
-        
-        // Devolvemos la URL de descarga
-        return storageRef.getDownloadUrl()
+        try {
+            val timestamp = Clock.System.now().toEpochMilliseconds()
+            val fileName = "video_${timestamp}.mp4"
+            println("Preparando subida a Storage: videos/$userId/$fileName")
+            val storageRef = storage.reference("videos/$userId/$fileName")
+            
+            val fileToUpload = createFirebaseFile(localUri)
+            
+            println("Iniciando putFile para: $localUri")
+            storageRef.putFile(fileToUpload)
+            println("putFile completado con éxito")
+            
+            val downloadUrl = storageRef.getDownloadUrl()
+            println("URL de descarga obtenida: $downloadUrl")
+            return downloadUrl
+        } catch (e: Exception) {
+            println("Error específico en VideoStorageService: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 }

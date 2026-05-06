@@ -1,5 +1,5 @@
 [versions]
-agp = "8.11.2"
+agp = "8.13.2"
 android-compileSdk = "36"
 android-minSdk = "28"
 android-targetSdk = "36"
@@ -40,6 +40,7 @@ compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMul
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 firebase-storage = { module = "dev.gitlive:firebase-storage", version.ref = "firebase-kotlin-sdk" }
+firebase-database = { module = "dev.gitlive:firebase-database", version.ref = "firebase-kotlin-sdk" }
 firebase-common = { module = "dev.gitlive:firebase-common", version.ref = "firebase-kotlin-sdk" }
 
 [plugins]

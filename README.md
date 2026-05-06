@@ -5,17 +5,15 @@ Este es un proyecto **Compose Multiplatform** para la gestión de vídeos y esca
 ## 🚀 Estado del Proyecto (Punto de Control)
 
 ### ✅ Implementado
-- **Configuración Firebase (Android)**: Plugin de Google Services configurado y funcionando.
-- **Subida de Vídeos**: Los vídeos se suben correctamente a **Firebase Storage** en la ruta `videos/user_test_123/`.
-- **UI de Vídeos**: Pantalla `VideoListScreen` rediseñada con historial visual, estados de subida y menú para cámara/galería.
-- **ViewModel robusto**: `VideoViewModel` corregido (sin errores de tipos de Clock) y manejando estados globales de subida.
-- **Escalas ALP/GAS**: Pantallas funcionales creadas para el registro de valoraciones (en memoria).
+- **Configuración Firebase (Android)**: Plugin de Google Services y dependencias de Storage/Database configurados.
+- **Java 17**: Proyecto actualizado a JVM target 17 para compatibilidad con librerías de Firebase.
+- **Persistencia con Realtime Database**: Creado `VideoDatabaseService` para gestionar el historial en el nodo `usuarios/{userId}/videos_entrenamiento/`.
+- **UI de Vídeos**: Pantalla funcional con carga de historial desde la base de datos al iniciar.
 
 ### 🛠️ Pendiente (Próximos Pasos)
-1. **Persistencia con Firestore**: Guardar los registros de los vídeos en una base de datos para que el historial no se borre al cerrar la app.
-2. **Configuración iOS**: Añadir `GoogleService-Info.plist` en Xcode para habilitar Firebase en dispositivos Apple.
-3. **Reproductor de Vídeo**: Implementar la reproducción de los vídeos subidos directamente desde la app (ExoPlayer/AVPlayer).
-4. **Autenticación**: Cambiar el usuario de prueba por un sistema de login real.
+1. **Depurar Subida**: Actualmente la subida se queda "colgada". Hay que revisar si es por las reglas de Realtime Database o por la integración en el `VideoViewModel`.
+2. **Configuración iOS**: Pendiente rematar en Xcode (AppDelegate y GoogleService-Info.plist).
+3. **Reproductor de Vídeo**: Implementar la reproducción de los vídeos subidos directamente desde la app.
 
 ### ⚠️ Notas de Configuración
 - El archivo `composeApp/google-services.json` es **obligatorio** para que la app Android arranque.

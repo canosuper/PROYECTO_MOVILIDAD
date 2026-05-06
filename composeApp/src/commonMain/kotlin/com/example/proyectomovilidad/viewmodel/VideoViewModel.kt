@@ -3,6 +3,7 @@ package com.example.proyectomovilidad.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.proyectomovilidad.model.VideoUpload
+import com.example.proyectomovilidad.service.VideoDatabaseService
 import com.example.proyectomovilidad.service.VideoStorageService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,8 +13,12 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.Clock as KtClock
 
+import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration.Companion.seconds
+
 class VideoViewModel : ViewModel() {
     private val storageService = VideoStorageService()
+    private val databaseService = VideoDatabaseService()
     
     private val _videos = MutableStateFlow<List<VideoUpload>>(emptyList())
     val videos: StateFlow<List<VideoUpload>> = _videos.asStateFlow()
@@ -21,11 +26,23 @@ class VideoViewModel : ViewModel() {
     private val _isUploadingGlobal = MutableStateFlow(false)
     val isUploadingGlobal: StateFlow<Boolean> = _isUploadingGlobal.asStateFlow()
 
+    init {
+        // Al iniciar, cargamos los vídeos del usuario de prueba
+        loadVideos("user_test_123")
+    }
+
+    fun loadVideos(userId: String) {
+        viewModelScope.launch {
+            val history = databaseService.fetchVideos(userId)
+            _videos.value = history
+        }
+    }
+
     fun uploadVideo(localUri: String, durationSeconds: Int, userId: String = "user_test_123") {
         viewModelScope.launch {
             _isUploadingGlobal.value = true
+            println("Iniciando subida de vídeo: $localUri")
             
-            // 1. Crear un registro temporal para mostrar en la UI
             val now = KtClock.System.now()
             val tempId = now.toEpochMilliseconds().toString()
             val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -33,7 +50,7 @@ class VideoViewModel : ViewModel() {
             val tempVideo = VideoUpload(
                 id = tempId,
                 date = today,
-                goalId = "GAS_TEMP", // Se vinculará después
+                goalId = "GAS_TEMP",
                 videoUrl = "",
                 durationSeconds = durationSeconds,
                 isUploading = true
@@ -42,18 +59,32 @@ class VideoViewModel : ViewModel() {
             _videos.value = _videos.value + tempVideo
 
             try {
-                // 2. Subir a Storage
-                val downloadUrl = storageService.uploadVideo(localUri, userId)
-                
-                // 3. Actualizar el registro con la URL real
-                _videos.value = _videos.value.map { 
-                    if (it.id == tempId) it.copy(videoUrl = downloadUrl, isUploading = false) 
-                    else it 
+                // 1. Subir el archivo a Storage con tiempo límite de 60s
+                val downloadUrl = withTimeout(60.seconds) {
+                    println("Subiendo a Storage...")
+                    storageService.uploadVideo(localUri, userId)
                 }
+                println("Subida a Storage completada. URL: $downloadUrl")
+                
+                // 2. Crear el objeto final
+                val finalVideo = tempVideo.copy(videoUrl = downloadUrl, isUploading = false)
+
+                // 3. Guardar la referencia en Database con tiempo límite de 15s
+                withTimeout(15.seconds) {
+                    println("Guardando referencia en Database...")
+                    databaseService.saveVideoReference(userId, finalVideo)
+                }
+                
+                // 4. Actualizar la UI
+                _videos.value = _videos.value.map { 
+                    if (it.id == tempId) finalVideo else it 
+                }
+                println("Proceso de subida finalizado con éxito")
             } catch (e: Exception) {
-                // Manejar error de subida
+                println("Error en el proceso de subida: ${e.message}")
+                e.printStackTrace()
+                // Eliminamos el vídeo temporal si falló
                 _videos.value = _videos.value.filter { it.id != tempId }
-                // Aquí podrías emitir un error a la UI
             } finally {
                 _isUploadingGlobal.value = false
             }
