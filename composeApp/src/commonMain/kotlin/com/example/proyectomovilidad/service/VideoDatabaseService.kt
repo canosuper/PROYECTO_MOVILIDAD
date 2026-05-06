@@ -74,4 +74,15 @@ class VideoDatabaseService {
             emptyList()
         }
     }
+
+    suspend fun fetchUserName(userId: String): String? {
+        return try {
+            val snapshot = withTimeout(5.seconds) {
+                database.reference("usuarios/$userId/perfil/nombre").valueEvents.first()
+            }
+            snapshot.value as? String
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

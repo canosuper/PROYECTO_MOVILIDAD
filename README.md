@@ -7,13 +7,17 @@ Este es un proyecto **Compose Multiplatform** para la gestión de vídeos y esca
 ### ✅ Implementado
 - **Configuración Firebase (Android)**: Plugin de Google Services y dependencias de Storage/Database configurados.
 - **Java 17**: Proyecto actualizado a JVM target 17 para compatibilidad con librerías de Firebase.
-- **Persistencia con Realtime Database**: Creado `VideoDatabaseService` para gestionar el historial en el nodo `usuarios/{userId}/videos_entrenamiento/`.
-- **UI de Vídeos**: Pantalla funcional con carga de historial desde la base de datos al iniciar.
+- **Persistencia con Realtime Database**: Gestiona el historial en `usuarios/{userId}/videos_entrenamiento/` y el perfil en `usuarios/{userId}/perfil/`.
+- **UI de Vídeos**: Pantalla funcional con carga de historial y visualización de los últimos 10 vídeos.
+- **Subida Robusta**: Implementación de Timeouts (60s Storage / 15s Database) y Logs de diagnóstico para evitar bloqueos.
+- **Reproductor de Vídeo (Android)**: Integración de Media3 ExoPlayer para reproducir vídeos directamente desde el historial.
+- **Diseño Profesional**: Nueva identidad visual "Desarrollo" (multicolor) con Material 3, eliminando el morado por defecto y mejorando la experiencia de usuario (UX).
+- **Personalización**: Carga dinámica del nombre del usuario desde la base de datos para saludos personalizados.
 
 ### 🛠️ Pendiente (Próximos Pasos)
-1. **Depurar Subida**: Actualmente la subida se queda "colgada". Hay que revisar si es por las reglas de Realtime Database o por la integración en el `VideoViewModel`.
-2. **Configuración iOS**: Pendiente rematar en Xcode (AppDelegate y GoogleService-Info.plist).
-3. **Reproductor de Vídeo**: Implementar la reproducción de los vídeos subidos directamente desde la app.
+1. **Configuración iOS**: Pendiente rematar en Xcode (AppDelegate y GoogleService-Info.plist) y adaptar el VideoPlayer para iOS (AVPlayer).
+2. **Caché y Optimización**: Implementar caché de vídeo para ahorrar datos y compresión de archivos antes de la subida.
+3. **Módulos ALP/GAS**: Desarrollar la lógica de negocio para las escalas de valoración y objetivos.
 
 ### ⚠️ Notas de Configuración
 - El archivo `composeApp/google-services.json` es **obligatorio** para que la app Android arranque.

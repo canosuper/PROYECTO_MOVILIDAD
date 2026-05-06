@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.Clock as KtClock
 
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration.Companion.seconds
@@ -26,9 +25,21 @@ class VideoViewModel : ViewModel() {
     private val _isUploadingGlobal = MutableStateFlow(false)
     val isUploadingGlobal: StateFlow<Boolean> = _isUploadingGlobal.asStateFlow()
 
+    private val _userName = MutableStateFlow<String?>(null)
+    val userName: StateFlow<String?> = _userName.asStateFlow()
+
     init {
-        // Al iniciar, cargamos los vídeos del usuario de prueba
-        loadVideos("user_test_123")
+        // Al iniciar, cargamos los vídeos y el perfil del usuario de prueba
+        val testUserId = "user_test_123"
+        loadVideos(testUserId)
+        loadUserProfile(testUserId)
+    }
+
+    fun loadUserProfile(userId: String) {
+        viewModelScope.launch {
+            val name = databaseService.fetchUserName(userId)
+            _userName.value = name
+        }
     }
 
     fun loadVideos(userId: String) {
@@ -43,7 +54,7 @@ class VideoViewModel : ViewModel() {
             _isUploadingGlobal.value = true
             println("Iniciando subida de vídeo: $localUri")
             
-            val now = KtClock.System.now()
+            val now = kotlinx.datetime.Clock.System.now()
             val tempId = now.toEpochMilliseconds().toString()
             val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
             

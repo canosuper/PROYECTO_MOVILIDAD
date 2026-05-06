@@ -2,16 +2,15 @@ package com.example.proyectomovilidad.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.TrackChanges
-import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -19,6 +18,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
+    userName: String?,
     onNavigateToLoan: () -> Unit,
     onNavigateToAlp: () -> Unit,
     onNavigateToGas: () -> Unit,
@@ -40,10 +40,18 @@ fun DashboardScreen(
         ) {
             item {
                 Text(
-                    text = "Tareas Pendientes",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    text = "Hola${if (userName != null) ", $userName" else ""}, bienvenido 👋",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
+                Text(
+                    text = "Gestión de Atención Temprana",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
             item {
@@ -51,7 +59,8 @@ fun DashboardScreen(
                     title = "Documento de Compromiso",
                     description = "Firma inicial del préstamo del dispositivo.",
                     icon = Icons.Default.Description,
-                    onClick = onNavigateToLoan
+                    onClick = onNavigateToLoan,
+                    accentColor = Color(0xFF546E7A)
                 )
             }
 
@@ -61,7 +70,8 @@ fun DashboardScreen(
                     description = "Registra la fase de aprendizaje actual.",
                     icon = Icons.Default.Assessment,
                     onClick = onNavigateToAlp,
-                    status = "Pendiente"
+                    status = "Pendiente",
+                    accentColor = Color(0xFF1976D2)
                 )
             }
 
@@ -70,7 +80,8 @@ fun DashboardScreen(
                     title = "Objetivos GAS (Quincenal)",
                     description = "Evalúa y modifica los objetivos de entrenamiento.",
                     icon = Icons.Default.TrackChanges,
-                    onClick = onNavigateToGas
+                    onClick = onNavigateToGas,
+                    accentColor = Color(0xFFF57C00)
                 )
             }
 
@@ -79,7 +90,8 @@ fun DashboardScreen(
                     title = "Subir Video",
                     description = "Sube un video de 2 min del entorno natural.",
                     icon = Icons.Default.VideoLibrary,
-                    onClick = onNavigateToVideo
+                    onClick = onNavigateToVideo,
+                    accentColor = Color(0xFF388E3C)
                 )
             }
         }
@@ -92,11 +104,17 @@ fun DashboardCard(
     description: String,
     icon: ImageVector,
     onClick: () -> Unit,
-    status: String? = null
+    status: String? = null,
+    accentColor: Color = MaterialTheme.colorScheme.primary
 ) {
-    ElevatedCard(
+    Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -104,12 +122,20 @@ fun DashboardCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            Surface(
+                color = accentColor.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.size(56.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = accentColor
+                    )
+                }
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -131,7 +157,7 @@ fun DashboardCard(
                 }
             }
             Icon(
-                imageVector = Icons.Default.ChevronRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null
             )
         }
