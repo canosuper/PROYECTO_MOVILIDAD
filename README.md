@@ -8,16 +8,18 @@ Este es un proyecto **Compose Multiplatform** para la gestión de vídeos y esca
 - **Configuración Firebase (Android)**: Plugin de Google Services y dependencias de Storage/Database configurados.
 - **Java 17**: Proyecto actualizado a JVM target 17 para compatibilidad con librerías de Firebase.
 - **Persistencia con Realtime Database**: Gestiona el historial en `usuarios/{userId}/videos_entrenamiento/` y el perfil en `usuarios/{userId}/perfil/`.
-- **UI de Vídeos**: Pantalla funcional con carga de historial y visualización de los últimos 10 vídeos.
+- **UI de Vídeos**: Pantalla funcional con carga de historial, ordenación cronológica (más reciente primero) y formato de fecha/hora en español.
 - **Subida Robusta**: Implementación de Timeouts (60s Storage / 15s Database) y Logs de diagnóstico para evitar bloqueos.
 - **Reproductor de Vídeo (Android)**: Integración de Media3 ExoPlayer para reproducir vídeos directamente desde el historial.
-- **Diseño Profesional**: Nueva identidad visual "Desarrollo" (multicolor) con Material 3, eliminando el morado por defecto y mejorando la experiencia de usuario (UX).
-- **Personalización**: Carga dinámica del nombre del usuario desde la base de datos para saludos personalizados.
+- **Borrado Completo**: Interacción *Swipe-to-Dismiss* para eliminar vídeos tanto de Storage como de la Database con diálogo de confirmación.
+- **Navegación Intuitiva**: Indicador dinámico de "Ver más vídeos" y contador total en el historial para mejorar la usabilidad.
+- **Diseño Profesional**: Identidad visual "Desarrollo" (multicolor) con Material 3 y saludos personalizados.
 
 ### 🛠️ Pendiente (Próximos Pasos)
-1. **Configuración iOS**: Pendiente rematar en Xcode (AppDelegate y GoogleService-Info.plist) y adaptar el VideoPlayer para iOS (AVPlayer).
-2. **Caché y Optimización**: Implementar caché de vídeo para ahorrar datos y compresión de archivos antes de la subida.
-3. **Módulos ALP/GAS**: Desarrollar la lógica de negocio para las escalas de valoración y objetivos.
+1. **Notificaciones de Seguimiento**: Implementar avisos si pasan 15 días sin que el usuario suba un nuevo vídeo.
+2. **Configuración iOS**: Pendiente rematar en Xcode y adaptar el VideoPlayer para iOS (AVPlayer).
+3. **Caché y Optimización**: Implementar caché de vídeo y compresión de archivos antes de la subida.
+4. **Módulos ALP/GAS**: Desarrollar la lógica de negocio para las escalas de valoración y objetivos.
 
 ### ⚠️ Notas de Configuración
 - El archivo `composeApp/google-services.json` es **obligatorio** para que la app Android arranque.

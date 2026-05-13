@@ -1,44 +1,52 @@
 package com.example.proyectomovilidad.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.proyectomovilidad.model.VideoUpload
 import com.example.proyectomovilidad.util.rememberVideoPicker
 import com.example.proyectomovilidad.viewmodel.VideoViewModel
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoListScreen(
     viewModel: VideoViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val videos by viewModel.videos.collectAsState()
     val isUploadingGlobal by viewModel.isUploadingGlobal.collectAsState()
+    val listState = rememberLazyListState()
+    val canScrollDown by remember { derivedStateOf { listState.canScrollForward } }
     
-    var selectedVideoUrl by remember { mutableStateOf<String?>(null) }
-    var showErrorDialog by remember { mutableStateOf<String?>(null) }
-    var showSheet by remember { mutableStateOf(false) }
+    var selectedVideoUrl by mutableStateOf<String?>(null)
+    var videoToDelete by mutableStateOf<VideoUpload?>(null)
+    var showErrorDialog by mutableStateOf<String?>(null)
+    var showSheet by mutableStateOf(false)
     val sheetState = rememberModalBottomSheetState()
     
     val videoPicker = rememberVideoPicker(
         onVideoSelected = { uri, durationMs ->
             val seconds = (durationMs / 1000).toInt()
-            // El VideoViewModel ya se encarga de la subida
             viewModel.uploadVideo(uri, seconds)
             showSheet = false
         },
@@ -100,6 +108,30 @@ fun VideoListScreen(
             )
         }
 
+        if (videoToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { videoToDelete = null },
+                title = { Text("¿Eliminar vídeo?") },
+                text = { Text("Esta acción borrará el vídeo del historial y del servidor. No se puede deshacer.") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.deleteVideo(videoToDelete!!)
+                            videoToDelete = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Eliminar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { videoToDelete = null }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
         if (showSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
@@ -138,47 +170,129 @@ fun VideoListScreen(
                 )
             }
         } else {
-            LazyColumn(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                if (isUploadingGlobal) {
-                    item {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer { alpha = 0.99f }
+                        .drawWithContent {
+                            drawContent()
+                            drawRect(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(Color.Black, Color.Transparent),
+                                    startY = size.height * 0.90f,
+                                    endY = size.height
+                                ),
+                                blendMode = BlendMode.DstIn
+                            )
+                        },
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
+                ) {
+                    if (isUploadingGlobal) {
+                        item {
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text("Subiendo vídeo... por favor, no cierres la app.")
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Text("Subiendo vídeo... por favor, no cierres la app.")
+                                }
                             }
+                        }
+                    }
+
+                    item {
+                        Text(
+                            text = "Historial (${videos.size} vídeos)",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    
+                    items(videos, key = { it.id }) { video ->
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = {
+                                if (it == SwipeToDismissBoxValue.EndToStart) {
+                                    videoToDelete = video
+                                    false
+                                } else false
+                            }
+                        )
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            enableDismissFromStartToEnd = false,
+                            backgroundContent = {
+                                val color = when (dismissState.dismissDirection) {
+                                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+                                    else -> Color.Transparent
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(vertical = 4.dp)
+                                        .background(color, MaterialTheme.shapes.medium),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Borrar",
+                                        modifier = Modifier.padding(end = 16.dp),
+                                        tint = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                }
+                            }
+                        ) {
+                            VideoItem(video, onClick = {
+                                if (!video.isUploading && video.videoUrl.isNotEmpty()) {
+                                    selectedVideoUrl = video.videoUrl
+                                }
+                            })
                         }
                     }
                 }
 
-                item {
-                    Text(
-                        text = "Historial de grabaciones",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                
-                items(videos.reversed().take(10)) { video ->
-                    VideoItem(video, onClick = {
-                        if (!video.isUploading && video.videoUrl.isNotEmpty()) {
-                            selectedVideoUrl = video.videoUrl
+                if (canScrollDown && videos.size > 2) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 16.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.extraLarge,
+                        shadowElevation = 4.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Ver más vídeos",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         }
-                    })
+                    }
                 }
             }
         }
@@ -206,8 +320,22 @@ fun VideoItem(video: VideoUpload, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
+                val formattedDate = remember(video.timestamp) {
+                    if (video.timestamp == 0L) "Vídeo del ${video.date}"
+                    else {
+                        val instant = Instant.fromEpochMilliseconds(video.timestamp)
+                        val dt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                        val mes = when (dt.month.ordinal + 1) {
+                            1 -> "enero"; 2 -> "febrero"; 3 -> "marzo"; 4 -> "abril"
+                            5 -> "mayo"; 6 -> "junio"; 7 -> "julio"; 8 -> "agosto"
+                            9 -> "septiembre"; 10 -> "octubre"; 11 -> "noviembre"; 12 -> "diciembre"
+                            else -> ""
+                        }
+                        "${dt.dayOfMonth} de $mes de ${dt.year}, ${dt.hour.toString().padStart(2, '0')}:${dt.minute.toString().padStart(2, '0')}"
+                    }
+                }
                 Text(
-                    text = "Vídeo del ${video.date}",
+                    text = formattedDate,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )

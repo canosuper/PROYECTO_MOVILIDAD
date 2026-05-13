@@ -19,6 +19,7 @@ class VideoDatabaseService {
             val data = mapOf(
                 "id" to video.id,
                 "date" to video.date.toString(),
+                "timestamp" to video.timestamp,
                 "url" to video.videoUrl,
                 "duration" to video.durationSeconds
             )
@@ -58,6 +59,7 @@ class VideoDatabaseService {
                         VideoUpload(
                             id = map["id"] as? String ?: "",
                             date = LocalDate.parse(map["date"] as? String ?: ""),
+                            timestamp = (map["timestamp"] as? Number)?.toLong() ?: 0L,
                             goalId = "GAS_TEMP",
                             videoUrl = map["url"] as? String ?: "",
                             durationSeconds = (map["duration"] as? Number)?.toInt() ?: 0
@@ -83,6 +85,18 @@ class VideoDatabaseService {
             snapshot.value as? String
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun deleteVideoReference(userId: String, videoId: String) {
+        try {
+            val videoRef = database.reference("usuarios/$userId/videos_entrenamiento/$videoId")
+            println("Borrando referencia en DB: usuarios/$userId/videos_entrenamiento/$videoId")
+            videoRef.removeValue()
+            println("Referencia de DB borrada con éxito")
+        } catch (e: Exception) {
+            println("Error al borrar referencia de DB: ${e.message}")
+            throw e
         }
     }
 }

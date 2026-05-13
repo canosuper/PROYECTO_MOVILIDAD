@@ -38,6 +38,7 @@ data class GasGoal(
 data class VideoUpload(
     val id: String,
     val date: LocalDate,
+    val timestamp: Long = 0L, // Añadido para ordenación precisa y hora
     val goalId: String, // Vinculado a un objetivo GAS
     val videoUrl: String,
     val durationSeconds: Int,
