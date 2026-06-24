@@ -5,10 +5,11 @@ Este es un proyecto **Compose Multiplatform** para la gestión de vídeos y esca
 ## 🚀 Estado del Proyecto (Punto de Control)
 
 ### ✅ Implementado
-- **Configuración Firebase (Android)**: Plugin de Google Services y dependencias de Storage/Database configurados.
-- **Java 17**: Proyecto actualizado a JVM target 17 para compatibilidad con librerías de Firebase.
-- **Persistencia con Realtime Database**: Gestiona el historial en `usuarios/{userId}/videos_entrenamiento/` y el perfil en `usuarios/{userId}/perfil/`.
-- **UI de Vídeos**: Pantalla funcional con carga de historial, ordenación cronológica (más reciente primero) y formato de fecha/hora en español.
+- **Sistema de Login Híbrido**: Autenticación dual que detecta automáticamente si el usuario es un paciente (PIN 4-6 dígitos) o un profesional (Usuario/Contraseña).
+- **Integración con Ecosistema Web**: Conexión activa con los nodos oficiales de `pacientes`, `usuarios` (fisios) y `sedes` para interoperabilidad total.
+- **Sincronización de Perfiles**: Al subir el primer vídeo, la app vincula automáticamente los datos globales del paciente con su historial privado en `usuarios_movil`.
+- **Persistencia Robusta**: Historial gestionado en `usuarios_movil/{userId}/videos_entrenamiento/` con soporte para formatos de datos mixtos (Map/List).
+- **UI de Vídeos**: Pantalla funcional con carga de historial, ordenación cronológica y formato de fecha/hora en español.
 - **Subida Robusta**: Implementación de Timeouts (60s Storage / 15s Database) y Logs de diagnóstico para evitar bloqueos.
 - **Reproductor de Vídeo (Android)**: Integración de Media3 ExoPlayer para reproducir vídeos directamente desde el historial.
 - **Borrado Completo**: Interacción *Swipe-to-Dismiss* para eliminar vídeos tanto de Storage como de la Database con diálogo de confirmación.

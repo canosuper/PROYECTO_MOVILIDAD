@@ -30,16 +30,15 @@ class VideoViewModel : ViewModel() {
     val userName: StateFlow<String?> = _userName.asStateFlow()
 
     init {
-        // Al iniciar, cargamos los vídeos y el perfil del usuario de prueba
-        val testUserId = "user_test_123"
-        loadVideos(testUserId)
-        loadUserProfile(testUserId)
+        // Ya no cargamos nada por defecto al iniciar
     }
 
-    fun loadUserProfile(userId: String) {
+    fun loadUserProfile(userId: String, loginName: String? = null) {
         viewModelScope.launch {
-            val name = databaseService.fetchUserName(userId)
-            _userName.value = name
+            // Intentamos cargar el nombre de la base de datos móvil
+            val nameFromDb = databaseService.fetchUserName(userId)
+            // Si no está en la móvil pero tenemos el del login, usamos ese
+            _userName.value = nameFromDb ?: loginName
         }
     }
 
@@ -51,7 +50,7 @@ class VideoViewModel : ViewModel() {
         }
     }
 
-    fun uploadVideo(localUri: String, durationSeconds: Int, userId: String = "user_test_123") {
+    fun uploadVideo(localUri: String, durationSeconds: Int, userId: String) {
         viewModelScope.launch {
             _isUploadingGlobal.value = true
             println("Iniciando subida de vídeo: $localUri")
@@ -76,29 +75,23 @@ class VideoViewModel : ViewModel() {
             try {
                 // 1. Subir el archivo a Storage con tiempo límite de 60s
                 val downloadUrl = withTimeout(60.seconds) {
-                    println("Subiendo a Storage...")
                     storageService.uploadVideo(localUri, userId)
                 }
-                println("Subida a Storage completada. URL: $downloadUrl")
                 
                 // 2. Crear el objeto final
                 val finalVideo = tempVideo.copy(videoUrl = downloadUrl, isUploading = false)
 
-                // 3. Guardar la referencia en Database con tiempo límite de 15s
+                // 3. Guardar la referencia Y sincronizar perfil si es necesario
                 withTimeout(15.seconds) {
-                    println("Guardando referencia en Database...")
-                    databaseService.saveVideoReference(userId, finalVideo)
+                    databaseService.saveVideoReference(userId, finalVideo, _userName.value)
                 }
                 
                 // 4. Actualizar la UI
                 _videos.value = _videos.value.map { 
                     if (it.id == tempId) finalVideo else it 
                 }
-                println("Proceso de subida finalizado con éxito")
             } catch (e: Exception) {
-                println("Error en el proceso de subida: ${e.message}")
-                e.printStackTrace()
-                // Eliminamos el vídeo temporal si falló
+                println("Error en subida: ${e.message}")
                 _videos.value = _videos.value.filter { it.id != tempId }
             } finally {
                 _isUploadingGlobal.value = false
@@ -106,7 +99,7 @@ class VideoViewModel : ViewModel() {
         }
     }
 
-    fun deleteVideo(video: VideoUpload, userId: String = "user_test_123") {
+    fun deleteVideo(video: VideoUpload, userId: String) {
         viewModelScope.launch {
             try {
                 // 1. Borrar de Storage físico

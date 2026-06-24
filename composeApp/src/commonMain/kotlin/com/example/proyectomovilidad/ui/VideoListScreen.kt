@@ -31,6 +31,7 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun VideoListScreen(
     viewModel: VideoViewModel,
+    userId: String,
     onBack: () -> Unit,
 ) {
     val videos by viewModel.videos.collectAsState()
@@ -47,7 +48,7 @@ fun VideoListScreen(
     val videoPicker = rememberVideoPicker(
         onVideoSelected = { uri, durationMs ->
             val seconds = (durationMs / 1000).toInt()
-            viewModel.uploadVideo(uri, seconds)
+            viewModel.uploadVideo(uri, seconds, userId)
             showSheet = false
         },
         onError = { error ->
@@ -116,7 +117,7 @@ fun VideoListScreen(
                 confirmButton = {
                     Button(
                         onClick = {
-                            viewModel.deleteVideo(videoToDelete!!)
+                            viewModel.deleteVideo(videoToDelete!!, userId)
                             videoToDelete = null
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)

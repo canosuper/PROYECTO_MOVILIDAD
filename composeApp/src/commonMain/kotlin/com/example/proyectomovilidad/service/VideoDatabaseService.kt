@@ -12,10 +12,26 @@ import kotlin.time.Duration.Companion.seconds
 class VideoDatabaseService {
     private val database = Firebase.database("https://proyecto-movilidad-18726-default-rtdb.europe-west1.firebasedatabase.app")
 
-    suspend fun saveVideoReference(userId: String, video: VideoUpload) {
+    /**
+     * Crea o actualiza el perfil del usuario en el nodo móvil para asegurar consistencia
+     */
+    suspend fun syncUserProfile(userId: String, name: String) {
         try {
-            println("Guardando referencia en DB: usuarios/$userId/videos_entrenamiento/${video.id}")
-            val videoRef = database.reference("usuarios/$userId/videos_entrenamiento/${video.id}")
+            val perfilRef = database.reference("usuarios_movil/$userId/perfil")
+            perfilRef.setValue(mapOf("nombre" to name))
+            println("Perfil sincronizado en usuarios_movil para: $name")
+        } catch (e: Exception) {
+            println("Error sincronizando perfil: ${e.message}")
+        }
+    }
+
+    suspend fun saveVideoReference(userId: String, video: VideoUpload, userName: String? = null) {
+        try {
+            // Si nos pasan el nombre, aprovechamos para asegurar que el perfil existe en usuarios_movil
+            userName?.let { syncUserProfile(userId, it) }
+
+            println("Guardando referencia en DB: usuarios_movil/$userId/videos_entrenamiento/${video.id}")
+            val videoRef = database.reference("usuarios_movil/$userId/videos_entrenamiento/${video.id}")
             val data = mapOf(
                 "id" to video.id,
                 "date" to video.date.toString(),
@@ -36,7 +52,7 @@ class VideoDatabaseService {
         return try {
             println("Cargando vídeos para el usuario: $userId")
             val snapshot = withTimeout(10.seconds) {
-                database.reference("usuarios/$userId/videos_entrenamiento").valueEvents.first()
+                database.reference("usuarios_movil/$userId/videos_entrenamiento").valueEvents.first()
             }
             val value = snapshot.value
             
@@ -79,19 +95,29 @@ class VideoDatabaseService {
 
     suspend fun fetchUserName(userId: String): String? {
         return try {
+            println("Buscando nombre para: $userId en usuarios_movil")
             val snapshot = withTimeout(5.seconds) {
-                database.reference("usuarios/$userId/perfil/nombre").valueEvents.first()
+                database.reference("usuarios_movil/$userId").valueEvents.first()
             }
-            snapshot.value as? String
+            val data = snapshot.value as? Map<String, Any>
+            
+            // Intento 1: usuarios_movil/ID/perfil/nombre
+            // Intento 2: usuarios_movil/ID/nombre
+            val name = (data?.get("perfil") as? Map<String, Any>)?.get("nombre") as? String
+                ?: data?.get("nombre") as? String
+            
+            println("Nombre encontrado en DB: $name")
+            name
         } catch (e: Exception) {
+            println("Error al recuperar nombre de DB: ${e.message}")
             null
         }
     }
 
     suspend fun deleteVideoReference(userId: String, videoId: String) {
         try {
-            val videoRef = database.reference("usuarios/$userId/videos_entrenamiento/$videoId")
-            println("Borrando referencia en DB: usuarios/$userId/videos_entrenamiento/$videoId")
+            val videoRef = database.reference("usuarios_movil/$userId/videos_entrenamiento/$videoId")
+            println("Borrando referencia en DB: usuarios_movil/$userId/videos_entrenamiento/$videoId")
             videoRef.removeValue()
             println("Referencia de DB borrada con éxito")
         } catch (e: Exception) {

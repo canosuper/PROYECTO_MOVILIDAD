@@ -2,16 +2,20 @@ package com.example.proyectomovilidad.model
 
 import kotlinx.datetime.LocalDate
 
+import kotlinx.serialization.Serializable
+
 /**
  * Escala de valoración ALP (Assessment of Learning Process)
  * Se evalúa mensualmente para marcar la fase actual.
  */
+@Serializable
 data class AlpAssessment(
     val date: LocalDate,
     val phase: AlpPhase,
     val observations: String = ""
 )
 
+@Serializable
 enum class AlpPhase {
     NO_CONTACT,       // Sin contacto
     CONTACT,          // Contacto
@@ -24,6 +28,7 @@ enum class AlpPhase {
  * Escala GAS (Goal Attainment Scaling)
  * Documento abierto para evaluar objetivos de entrenamiento.
  */
+@Serializable
 data class GasGoal(
     val id: String,
     val description: String,
@@ -35,6 +40,7 @@ data class GasGoal(
 /**
  * Registro de video subido por la familia.
  */
+@Serializable
 data class VideoUpload(
     val id: String,
     val date: LocalDate,
@@ -49,6 +55,7 @@ data class VideoUpload(
 /**
  * Documento de compromiso de préstamo.
  */
+@Serializable
 data class LoanCommitment(
     val parentName: String,
     val childName: String,

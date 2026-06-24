@@ -39,6 +39,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.firebase.storage)
             implementation(libs.firebase.database)
+            implementation(libs.firebase.auth)
             implementation(libs.firebase.common)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

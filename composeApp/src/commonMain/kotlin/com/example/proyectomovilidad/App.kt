@@ -12,10 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.proyectomovilidad.model.VideoUpload
-import com.example.proyectomovilidad.ui.AlpScreen
-import com.example.proyectomovilidad.ui.DashboardScreen
-import com.example.proyectomovilidad.ui.GasScreen
-import com.example.proyectomovilidad.ui.VideoListScreen
+import com.example.proyectomovilidad.ui.*
+import com.example.proyectomovilidad.viewmodel.LoginViewModel
+import com.example.proyectomovilidad.viewmodel.VideoViewModel
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -37,8 +36,16 @@ private val LightColors = lightColorScheme(
 @Composable
 @Preview
 fun App() {
-    val videoViewModel = remember { com.example.proyectomovilidad.viewmodel.VideoViewModel() }
-    val userName by videoViewModel.userName.collectAsState()
+    val videoViewModel = remember { VideoViewModel() }
+    val loginViewModel = remember { LoginViewModel() }
+    
+    // Estado de la sesión
+    var loggedUserId by remember { mutableStateOf<String?>(null) }
+    var loggedUserName by remember { mutableStateOf<String?>(null) }
+    var isFisio by remember { mutableStateOf(false) }
+
+    // Observamos el nombre real que viene de la base de datos
+    val userNameFromDB by videoViewModel.userName.collectAsState()
 
     MaterialTheme(
         colorScheme = LightColors,
@@ -48,39 +55,52 @@ fun App() {
             large = RoundedCornerShape(28.dp)
         )
     ) {
-        var currentScreen by remember { mutableStateOf("dashboard") }
-        
-        // Estado temporal para la lista de vídeos
-        var videos by remember { mutableStateOf(listOf<VideoUpload>()) }
-
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            when (currentScreen) {
-                "dashboard" -> {
-                    DashboardScreen(
-                        userName = userName,
-                        onNavigateToLoan = { currentScreen = "loan" },
-                        onNavigateToAlp = { currentScreen = "alp" },
-                        onNavigateToGas = { currentScreen = "gas" },
-                        onNavigateToVideo = { currentScreen = "video" }
-                    )
-                }
-                "loan" -> {
-                    PlaceholderScreen("Documento de Compromiso") { currentScreen = "dashboard" }
-                }
-                "alp" -> {
-                    AlpScreen(onBack = { currentScreen = "dashboard" })
-                }
-                "gas" -> {
-                    GasScreen(onBack = { currentScreen = "dashboard" })
-                }
-                "video" -> {
-                    VideoListScreen(
-                        viewModel = videoViewModel,
-                        onBack = { currentScreen = "dashboard" }
-                    )
+            if (loggedUserId == null) {
+                LoginScreen(
+                    viewModel = loginViewModel,
+                    onLoginSuccess = { id, name, fisio ->
+                        loggedUserId = id
+                        loggedUserName = name
+                        isFisio = fisio
+                        // Disparar carga de datos real pasando el nombre obtenido del login
+                        videoViewModel.loadUserProfile(id, name)
+                        videoViewModel.loadVideos(id)
+                    }
+                )
+            } else {
+                var currentScreen by remember { mutableStateOf("dashboard") }
+
+                when (currentScreen) {
+                    "dashboard" -> {
+                        DashboardScreen(
+                            // PRIORIDAD: Nombre de DB > Nombre de Login > "Usuario"
+                            userName = userNameFromDB ?: loggedUserName.takeIf { it?.isNotEmpty() == true } ?: "Usuario",
+                            onNavigateToLoan = { currentScreen = "loan" },
+                            onNavigateToAlp = { currentScreen = "alp" },
+                            onNavigateToGas = { currentScreen = "gas" },
+                            onNavigateToVideo = { currentScreen = "video" }
+                        )
+                    }
+                    "loan" -> {
+                        PlaceholderScreen("Documento de Compromiso") { currentScreen = "dashboard" }
+                    }
+                    "alp" -> {
+                        AlpScreen(onBack = { currentScreen = "dashboard" })
+                    }
+                    "gas" -> {
+                        GasScreen(onBack = { currentScreen = "dashboard" })
+                    }
+                    "video" -> {
+                        VideoListScreen(
+                            viewModel = videoViewModel,
+                            userId = loggedUserId!!,
+                            onBack = { currentScreen = "dashboard" }
+                        )
+                    }
                 }
             }
         }
