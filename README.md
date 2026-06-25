@@ -16,14 +16,19 @@ Este es un proyecto **Compose Multiplatform** para la gestión de vídeos y esca
 - **Navegación Intuitiva**: Indicador dinámico de "Ver más vídeos" y contador total en el historial para mejorar la usabilidad.
 - **Diseño Profesional**: Identidad visual Premium basada en tonos azules y estilo moderno con Material 3 y saludos personalizados.
 - **Icono Adaptativo Custom**: Iconografía personalizada que integra los conceptos de "atención" y "reproducción de vídeo", optimizada para un aspecto profesional en el launcher.
-- **Documentación General**: Acceso centralizado a guías, manuales y documentos de compromiso gestionados dinámicamente desde el nodo `documentos_generales` de Firebase.
+- **Documentación General**: Acceso centralizado a guías, manuales y documentos de compromiso gestionados dinámicamente desde el nodo `documentos_generales`.
+- **Splash Screen Profesional**: Implementación de la API de Splash Screen de Android con icono personalizado y transición fluida.
+- **Notificaciones Push e Inactividad**: Sistema completo de re-engagement mediante Firebase Cloud Messaging.
+    - **Captura de Tokens**: Sincronización automática del Token FCM y la `lastActivity` en el login y subida de vídeos.
+    - **Cloud Functions**: Script en Node.js (2ª Gen) desplegado para monitorizar la inactividad de los usuarios.
+    - **Notificaciones Inteligentes**: Envío automático de mensajes personalizados ("¿subes un vídeo hoy?") tras 14 días de inactividad.
+    - **Automatización**: Programación mediante Cloud Scheduler para ejecución diaria a las 9:00 AM.
 - **Cierre de Sesión Seguro**: Botón de salida con limpieza total de estados y caché del usuario para evitar autologin indeseado.
 
 ### 🛠️ Pendiente (Próximos Pasos)
-1. **Notificaciones de Seguimiento**: Implementar avisos si pasan 15 días sin que el usuario suba un nuevo vídeo.
+1. **Módulos ALP/GAS**: Desarrollar la lógica de negocio para las escalas de valoración y objetivos.
 2. **Configuración iOS**: Pendiente rematar en Xcode y adaptar el VideoPlayer para iOS (AVPlayer).
 3. **Caché y Optimización**: Implementar caché de vídeo y compresión de archivos antes de la subida.
-4. **Módulos ALP/GAS**: Desarrollar la lógica de negocio para las escalas de valoración y objetivos.
 
 ### ⚠️ Notas de Configuración
 - El archivo `composeApp/google-services.json` es **obligatorio** para que la app Android arranque.

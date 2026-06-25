@@ -68,11 +68,15 @@ fun App() {
                         loggedUserId = id
                         loggedUserName = name
                         isFisio = fisio
-                        // IMPORTANTE: Resetear el estado de login para que no haga "autologin" al salir
+                        // Resetear estado de login
                         loginViewModel.resetState()
-                        // Disparar carga de datos real
+                        // Cargar datos
                         videoViewModel.loadUserProfile(id, name)
                         videoViewModel.loadVideos(id)
+                        
+                        // Capturamos el Token FCM usando el scope del ViewModel
+                        // Esto ahora es una llamada segura
+                        videoViewModel.updateFCMToken(id)
                     }
                 )
             } else {

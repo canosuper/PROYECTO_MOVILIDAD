@@ -2,6 +2,7 @@ package com.example.proyectomovilidad.service
 
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.database.database
+import dev.gitlive.firebase.database.ServerValue
 import com.example.proyectomovilidad.model.VideoUpload
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalDate
@@ -18,10 +19,34 @@ class VideoDatabaseService {
     suspend fun syncUserProfile(userId: String, name: String) {
         try {
             val perfilRef = database.reference("usuarios_movil/$userId/perfil")
-            perfilRef.setValue(mapOf("nombre" to name))
+            // Usamos un mapa para actualizar solo los campos necesarios sin borrar el resto (como el token)
+            perfilRef.updateChildren(mapOf(
+                "nombre" to name,
+                "lastActivity" to ServerValue.TIMESTAMP 
+            ))
             println("Perfil sincronizado en usuarios_movil para: $name")
         } catch (e: Exception) {
             println("Error sincronizando perfil: ${e.message}")
+        }
+    }
+
+    suspend fun updateFcmToken(userId: String, token: String) {
+        try {
+            val tokenRef = database.reference("usuarios_movil/$userId/perfil/fcmToken")
+            tokenRef.setValue(token)
+            println("Token FCM actualizado para el usuario: $userId")
+        } catch (e: Exception) {
+            println("Error al actualizar token FCM: ${e.message}")
+        }
+    }
+
+    suspend fun updateLastActivity(userId: String) {
+        try {
+            val activityRef = database.reference("usuarios_movil/$userId/perfil/lastActivity")
+            activityRef.setValue(ServerValue.TIMESTAMP)
+            println("Última actividad actualizada para: $userId")
+        } catch (e: Exception) {
+            println("Error al actualizar última actividad: ${e.message}")
         }
     }
 
@@ -40,6 +65,7 @@ class VideoDatabaseService {
                 "duration" to video.durationSeconds
             )
             videoRef.setValue(data)
+            updateLastActivity(userId) // Cada vez que sube un vídeo, actualizamos actividad
             println("Referencia guardada con éxito")
         } catch (e: Exception) {
             println("Error al guardar en DB: ${e.message}")

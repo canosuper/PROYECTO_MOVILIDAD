@@ -7,3 +7,8 @@ class IOSPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
+
+actual suspend fun getFcmToken(): String? {
+    // Pendiente implementar con el SDK de Firebase para iOS
+    return null
+}

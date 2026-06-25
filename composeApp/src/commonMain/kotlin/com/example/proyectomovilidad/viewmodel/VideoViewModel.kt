@@ -33,6 +33,21 @@ class VideoViewModel : ViewModel() {
         // Ya no cargamos nada por defecto al iniciar
     }
 
+    fun updateFCMToken(userId: String) {
+        viewModelScope.launch {
+            try {
+                // Importamos la función que creamos en Platform.kt
+                val token = com.example.proyectomovilidad.getFcmToken()
+                if (token != null) {
+                    databaseService.updateFcmToken(userId, token)
+                    databaseService.updateLastActivity(userId) // Registra actividad al entrar
+                }
+            } catch (e: Exception) {
+                println("Error al actualizar Token en login: ${e.message}")
+            }
+        }
+    }
+
     fun loadUserProfile(userId: String, loginName: String? = null) {
         viewModelScope.launch {
             // Intentamos cargar el nombre de la base de datos móvil
