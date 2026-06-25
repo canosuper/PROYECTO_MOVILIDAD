@@ -14,7 +14,10 @@ Este es un proyecto **Compose Multiplatform** para la gestión de vídeos y esca
 - **Reproductor de Vídeo (Android)**: Integración de Media3 ExoPlayer para reproducir vídeos directamente desde el historial.
 - **Borrado Completo**: Interacción *Swipe-to-Dismiss* para eliminar vídeos tanto de Storage como de la Database con diálogo de confirmación.
 - **Navegación Intuitiva**: Indicador dinámico de "Ver más vídeos" y contador total en el historial para mejorar la usabilidad.
-- **Diseño Profesional**: Identidad visual "Desarrollo" (multicolor) con Material 3 y saludos personalizados.
+- **Diseño Profesional**: Identidad visual Premium basada en tonos azules y estilo moderno con Material 3 y saludos personalizados.
+- **Icono Adaptativo Custom**: Iconografía personalizada que integra los conceptos de "atención" y "reproducción de vídeo", optimizada para un aspecto profesional en el launcher.
+- **Documentación General**: Acceso centralizado a guías, manuales y documentos de compromiso gestionados dinámicamente desde el nodo `documentos_generales` de Firebase.
+- **Cierre de Sesión Seguro**: Botón de salida con limpieza total de estados y caché del usuario para evitar autologin indeseado.
 
 ### 🛠️ Pendiente (Próximos Pasos)
 1. **Notificaciones de Seguimiento**: Implementar avisos si pasan 15 días sin que el usuario suba un nuevo vídeo.

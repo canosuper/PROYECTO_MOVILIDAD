@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.proyectomovilidad.model.VideoUpload
 import com.example.proyectomovilidad.ui.*
+import com.example.proyectomovilidad.viewmodel.DocumentViewModel
 import com.example.proyectomovilidad.viewmodel.LoginViewModel
 import com.example.proyectomovilidad.viewmodel.VideoViewModel
 import kotlinx.datetime.TimeZone
@@ -38,6 +39,7 @@ private val LightColors = lightColorScheme(
 fun App() {
     val videoViewModel = remember { VideoViewModel() }
     val loginViewModel = remember { LoginViewModel() }
+    val documentViewModel = remember { DocumentViewModel() }
     
     // Estado de la sesión
     var loggedUserId by remember { mutableStateOf<String?>(null) }
@@ -81,7 +83,7 @@ fun App() {
                         DashboardScreen(
                             // PRIORIDAD: Nombre de DB > Nombre de Login > "Usuario"
                             userName = userNameFromDB ?: loggedUserName.takeIf { it?.isNotEmpty() == true } ?: "Usuario",
-                            onNavigateToLoan = { currentScreen = "loan" },
+                            onNavigateToDocuments = { currentScreen = "documents" },
                             onNavigateToAlp = { currentScreen = "alp" },
                             onNavigateToGas = { currentScreen = "gas" },
                             onNavigateToVideo = { currentScreen = "video" },
@@ -93,6 +95,12 @@ fun App() {
                                 loggedUserName = null
                                 isFisio = false
                             }
+                        )
+                    }
+                    "documents" -> {
+                        DocumentListScreen(
+                            viewModel = documentViewModel,
+                            onBack = { currentScreen = "dashboard" }
                         )
                     }
                     "loan" -> {

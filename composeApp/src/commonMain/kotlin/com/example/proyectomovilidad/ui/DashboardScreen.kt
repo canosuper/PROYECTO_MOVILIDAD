@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun DashboardScreen(
     userName: String?,
-    onNavigateToLoan: () -> Unit,
+    onNavigateToDocuments: () -> Unit,
     onNavigateToAlp: () -> Unit,
     onNavigateToGas: () -> Unit,
     onNavigateToVideo: () -> Unit,
@@ -66,10 +66,10 @@ fun DashboardScreen(
 
             item {
                 DashboardCard(
-                    title = "Documento de Compromiso",
-                    description = "Firma inicial del préstamo del dispositivo.",
-                    icon = Icons.Default.Description,
-                    onClick = onNavigateToLoan,
+                    title = "Documentación General",
+                    description = "Consulta de documentos generales y guías.",
+                    icon = Icons.Default.Folder,
+                    onClick = onNavigateToDocuments,
                     accentColor = Color(0xFF546E7A)
                 )
             }
