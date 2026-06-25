@@ -12,10 +12,9 @@ class VideoStorageService {
     // Especificamos el bucket explícitamente como hicimos con la DB para evitar desvíos de región
     private val storage = Firebase.storage("gs://proyecto-movilidad-18726.firebasestorage.app")
 
-    suspend fun uploadVideo(localUri: String, userId: String): String {
+    suspend fun uploadVideo(localUri: String, userId: String, videoId: String): String {
         try {
-            val timestamp = Clock.System.now().toEpochMilliseconds()
-            val fileName = "video_${timestamp}.mp4"
+            val fileName = "video_${videoId}.mp4"
             println("Preparando subida a Storage: videos/$userId/$fileName")
             val storageRef = storage.reference("videos/$userId/$fileName")
             

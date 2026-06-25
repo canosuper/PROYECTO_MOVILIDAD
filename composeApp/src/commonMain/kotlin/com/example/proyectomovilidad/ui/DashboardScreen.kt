@@ -22,12 +22,22 @@ fun DashboardScreen(
     onNavigateToLoan: () -> Unit,
     onNavigateToAlp: () -> Unit,
     onNavigateToGas: () -> Unit,
-    onNavigateToVideo: () -> Unit
+    onNavigateToVideo: () -> Unit,
+    onLogout: () -> Unit
 ) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Proyecto Movilidad AT") }
+                title = { Text("Proyecto Movilidad AT") },
+                actions = {
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            imageVector = Icons.Default.Logout,
+                            contentDescription = "Cerrar Sesión",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -88,7 +98,7 @@ fun DashboardScreen(
             item {
                 DashboardCard(
                     title = "Subir Video",
-                    description = "Sube un video de 2 min del entorno natural.",
+                    description = "Graba o selecciona un video corto (aprox. 2 min) de las rutinas o actividades.",
                     icon = Icons.Default.VideoLibrary,
                     onClick = onNavigateToVideo,
                     accentColor = Color(0xFF388E3C)

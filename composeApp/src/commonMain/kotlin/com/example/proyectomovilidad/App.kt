@@ -66,7 +66,9 @@ fun App() {
                         loggedUserId = id
                         loggedUserName = name
                         isFisio = fisio
-                        // Disparar carga de datos real pasando el nombre obtenido del login
+                        // IMPORTANTE: Resetear el estado de login para que no haga "autologin" al salir
+                        loginViewModel.resetState()
+                        // Disparar carga de datos real
                         videoViewModel.loadUserProfile(id, name)
                         videoViewModel.loadVideos(id)
                     }
@@ -82,7 +84,15 @@ fun App() {
                             onNavigateToLoan = { currentScreen = "loan" },
                             onNavigateToAlp = { currentScreen = "alp" },
                             onNavigateToGas = { currentScreen = "gas" },
-                            onNavigateToVideo = { currentScreen = "video" }
+                            onNavigateToVideo = { currentScreen = "video" },
+                            onLogout = {
+                                // Limpiamos todo el rastro de la sesión
+                                videoViewModel.clearData()
+                                loginViewModel.resetState()
+                                loggedUserId = null
+                                loggedUserName = null
+                                isFisio = false
+                            }
                         )
                     }
                     "loan" -> {

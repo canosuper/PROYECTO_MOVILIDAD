@@ -50,6 +50,11 @@ class VideoViewModel : ViewModel() {
         }
     }
 
+    fun clearData() {
+        _videos.value = emptyList()
+        _userName.value = null
+    }
+
     fun uploadVideo(localUri: String, durationSeconds: Int, userId: String) {
         viewModelScope.launch {
             _isUploadingGlobal.value = true
@@ -75,7 +80,7 @@ class VideoViewModel : ViewModel() {
             try {
                 // 1. Subir el archivo a Storage con tiempo límite de 60s
                 val downloadUrl = withTimeout(60.seconds) {
-                    storageService.uploadVideo(localUri, userId)
+                    storageService.uploadVideo(localUri, userId, tempId)
                 }
                 
                 // 2. Crear el objeto final
