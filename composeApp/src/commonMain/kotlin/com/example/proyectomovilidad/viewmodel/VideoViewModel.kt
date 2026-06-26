@@ -93,8 +93,8 @@ class VideoViewModel : ViewModel() {
             _videos.value = listOf(tempVideo) + _videos.value
 
             try {
-                // 1. Subir el archivo a Storage con tiempo límite de 60s
-                val downloadUrl = withTimeout(60.seconds) {
+                // 1. Subir el archivo a Storage con tiempo límite de 5 minutos (para vídeos largos)
+                val downloadUrl = withTimeout(300.seconds) {
                     storageService.uploadVideo(localUri, userId, tempId)
                 }
                 

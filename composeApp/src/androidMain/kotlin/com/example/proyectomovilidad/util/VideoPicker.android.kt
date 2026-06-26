@@ -30,7 +30,14 @@ actual fun rememberVideoPicker(
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CaptureVideo()
+        contract = object : ActivityResultContracts.CaptureVideo() {
+            override fun createIntent(context: android.content.Context, input: Uri): android.content.Intent {
+                return super.createIntent(context, input).apply {
+                    // 0 = Calidad baja (ligero), 1 = Calidad alta (pesado)
+                    putExtra(android.provider.MediaStore.EXTRA_VIDEO_QUALITY, 0)
+                }
+            }
+        }
     ) { success: Boolean ->
         if (success && tempVideoUri != null) {
             processVideo(context, tempVideoUri!!, onVideoSelected, onError)

@@ -17,6 +17,11 @@ import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
     
+    companion object {
+        lateinit var instance: MainActivity
+            private set
+    }
+
     // Lanzador para el permiso de notificaciones (Android 13+)
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -29,6 +34,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        instance = this
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)

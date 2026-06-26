@@ -10,7 +10,10 @@ Este es un proyecto **Compose Multiplatform** para la gestión de vídeos y esca
 - **Sincronización de Perfiles**: Al subir el primer vídeo, la app vincula automáticamente los datos globales del paciente con su historial privado en `usuarios_movil`.
 - **Persistencia Robusta**: Historial gestionado en `usuarios_movil/{userId}/videos_entrenamiento/` con soporte para formatos de datos mixtos (Map/List).
 - **UI de Vídeos**: Pantalla funcional con carga de historial, ordenación cronológica y formato de fecha/hora en español.
-- **Subida Robusta**: Implementación de Timeouts (60s Storage / 15s Database) y Logs de diagnóstico para evitar bloqueos.
+- **Subida Robusta y Optimizada**:
+    - **Compresión Nativa (720p)**: Integración de `Media3 Transformer` para comprimir vídeos antes de la subida, logrando reducciones masivas (ej: de 250MB a ~10MB) mediante re-escalado forzado y optimización de bitrate.
+    - **Gestión de Timeouts**: Tiempo de espera ampliado temporalmente a 300s para garantizar estabilidad mientras se valida la compresión.
+    - **Calidad Adaptativa**: Configuración de captura optimizada para balancear peso y visibilidad clínica.
 - **Reproductor de Vídeo (Android)**: Integración de Media3 ExoPlayer para reproducir vídeos directamente desde el historial.
 - **Borrado Completo**: Interacción *Swipe-to-Dismiss* para eliminar vídeos tanto de Storage como de la Database con diálogo de confirmación.
 - **Navegación Intuitiva**: Indicador dinámico de "Ver más vídeos" y contador total en el historial para mejorar la usabilidad.
@@ -26,9 +29,11 @@ Este es un proyecto **Compose Multiplatform** para la gestión de vídeos y esca
 - **Cierre de Sesión Seguro**: Botón de salida con limpieza total de estados y caché del usuario para evitar autologin indeseado.
 
 ### 🛠️ Pendiente (Próximos Pasos)
-1. **Módulos ALP/GAS**: Desarrollar la lógica de negocio para las escalas de valoración y objetivos.
-2. **Configuración iOS**: Pendiente rematar en Xcode y adaptar el VideoPlayer para iOS (AVPlayer).
-3. **Caché y Optimización**: Implementar caché de vídeo y compresión de archivos antes de la subida.
+1. **Feedback de Subida**: Implementar una barra de progreso real para que el usuario visualice el avance de la carga.
+2. **Mejora de Errores**: Gestionar los fallos de timeout con mensajes amigables y opción de reintento.
+3. **Módulos ALP/GAS**: Desarrollar la lógica de negocio para las escalas de valoración y objetivos.
+4. **Optimización Final**: Ajustar el timeout (reducirlo de 5 min) una vez validada la eficiencia de la compresión en diversos dispositivos.
+5. **Configuración iOS**: Pendiente rematar en Xcode y adaptar el VideoPlayer para iOS (AVPlayer).
 
 ### ⚠️ Notas de Configuración
 - El archivo `composeApp/google-services.json` es **obligatorio** para que la app Android arranque.

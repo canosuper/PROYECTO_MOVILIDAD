@@ -5,8 +5,8 @@ import dev.gitlive.firebase.storage.storage
 import dev.gitlive.firebase.storage.File
 import kotlinx.datetime.Clock
 
-// Esta función puente permitirá a cada plataforma crear el archivo de Firebase correctamente
-expect fun createFirebaseFile(uri: String): File
+// Esta función puente permitirá a cada plataforma crear y comprimir el archivo correctamente
+expect suspend fun createFirebaseFile(uri: String): File
 
 class VideoStorageService {
     // Especificamos el bucket explícitamente como hicimos con la DB para evitar desvíos de región
