@@ -36,6 +36,8 @@ fun VideoListScreen(
 ) {
     val videos by viewModel.videos.collectAsState()
     val isUploadingGlobal by viewModel.isUploadingGlobal.collectAsState()
+    val uploadProgress by viewModel.uploadProgress.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     val listState = rememberLazyListState()
     val canScrollDown by remember { derivedStateOf { listState.canScrollForward } }
     
@@ -76,6 +78,20 @@ fun VideoListScreen(
             }
         }
     ) { padding ->
+        // Diálogo para errores (incluyendo timeout)
+        errorMessage?.let { error ->
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissError() },
+                title = { Text("Aviso de Subida") },
+                text = { Text(error) },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.dismissError() }) {
+                        Text("Entendido")
+                    }
+                }
+            )
+        }
+
         if (showErrorDialog != null) {
             AlertDialog(
                 onDismissRequest = { showErrorDialog = null },
@@ -204,13 +220,48 @@ fun VideoListScreen(
                                 ),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Row(
+                                Column(
                                     modifier = Modifier.padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Text("Subiendo vídeo... por favor, no cierres la app.")
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(24.dp),
+                                            strokeWidth = 2.dp
+                                        )
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Text(
+                                            text = "Subiendo vídeo...",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    
+                                    LinearProgressIndicator(
+                                        progress = uploadProgress,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "No cierres la aplicación",
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                        Text(
+                                            text = "${(uploadProgress * 100).toInt()}%",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
                         }
