@@ -118,11 +118,11 @@ fun LoginScreen(
         }
         
         // Botón rápido para desarrollo
-        TextButton(
-            onClick = { viewModel.login("user_test_123") },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Entrar como Usuario de Prueba (Dev)")
-        }
+//        TextButton(
+//            onClick = { viewModel.login("user_test_123") },
+//            modifier = Modifier.padding(top = 16.dp)
+//        ) {
+//            Text("Entrar como Usuario de Prueba (Dev)")
+//        }
     }
 }
