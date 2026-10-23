@@ -44,7 +44,7 @@ class DocumentService {
             }
             
             println("Total documentos cargados: ${docsList.size}")
-            docsList
+            docsList.sortedBy { it.id }
         } catch (e: Exception) {
             println("Error al cargar documentos: ${e.message}")
             emptyList()
